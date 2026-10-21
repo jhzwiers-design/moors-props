@@ -1,0 +1,234 @@
+/* Installation overlay — deliberately minimal. Tokens first. */
+:root {
+  --ink: #030203;
+  --paper: #efe6d8;
+  --muted: rgba(239, 230, 216, .42);
+  --brass: #d9a35b;
+  --serif: 'Cormorant', Georgia, 'Times New Roman', serif;
+  --sans: 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; background: var(--ink); color: var(--paper); }
+body { font-family: var(--sans); -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; touch-action: none; }
+body.hide-cursor, body.hide-cursor * { cursor: none !important; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+.stage, .stage canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.vignette {
+  position: fixed; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 75% 85% at 50% 42%, transparent 55%, rgba(0,0,0,.65) 100%);
+}
+
+/* tiny production mark, top-left */
+.mark {
+  position: fixed; left: 3.2vw; top: 3.6vh;
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(14px, 1.15vw, 26px); color: var(--muted); letter-spacing: .02em;
+  opacity: 0; transition: opacity 2s ease 1s;
+}
+.ready .mark { opacity: 1; }
+
+/* whispered instruction */
+.instruction, .message {
+  position: fixed; left: 0; right: 0; bottom: 9vh; text-align: center; pointer-events: none;
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(20px, 1.9vw, 46px); color: rgba(239,230,216,.72);
+  opacity: 0; transform: translateY(8px); transition: opacity 1.4s ease, transform 1.4s ease;
+}
+.instruction::before {
+  content: ''; display: block; width: 36px; height: 1px; margin: 0 auto 2.2vh; background: var(--brass);
+  animation: pulse 3s ease-in-out infinite;
+}
+@keyframes pulse { 50% { transform: scaleX(2.4); opacity: .4; } }
+.instruction.show, .message.show { opacity: 1; transform: none; }
+.message { font-size: clamp(16px, 1.35vw, 32px); max-width: 60ch; margin: 0 auto; padding: 0 16px; }
+
+/* caption line */
+.caption {
+  position: fixed; left: 50%; bottom: 6.5vh; transform: translate(-50%, 6px); width: min(1100px, 82vw);
+  text-align: center; pointer-events: none;
+  font-family: var(--serif); font-weight: 300; font-style: italic;
+  font-size: clamp(18px, 1.55vw, 38px); line-height: 1.3; text-wrap: balance;
+  opacity: 0; transition: opacity .6s ease, transform .8s ease;
+  text-shadow: 0 2px 18px rgba(0,0,0,.9);
+}
+.caption.show { opacity: 1; transform: translate(-50%, 0); }
+.caption span { color: rgba(239,230,216,.32); transition: color .3s ease; }
+.caption span.lit { color: var(--paper); }
+
+/* discreet controls */
+.controls { position: fixed; right: 2.6vw; bottom: 3vh; display: flex; gap: 12px; opacity: 0; transition: opacity 2s ease 1s; }
+.ready .controls { opacity: 1; }
+.ctl {
+  width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+  border: 1px solid rgba(239,230,216,.12); opacity: .35; transition: opacity .3s, border-color .3s;
+}
+.ctl:hover, .ctl:active, .ctl:focus-visible { opacity: .9; border-color: var(--brass); outline: none; }
+.ctl svg { width: 42%; height: 42%; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.ctl .i-off, .ctl[aria-pressed="true"] .i-on { display: none; }
+.ctl[aria-pressed="true"] .i-off { display: block; }
+
+/* start veil */
+.start {
+  position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.4vh;
+  background: rgba(3,2,3,.86); backdrop-filter: blur(3px); cursor: pointer;
+  transition: opacity 1.6s ease, visibility 1.6s;
+}
+.start.gone { opacity: 0; visibility: hidden; }
+.start-kicker { font-size: clamp(10px, .8vw, 16px); letter-spacing: .36em; text-transform: uppercase; color: var(--muted); }
+.start-title { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: clamp(40px, 5vw, 120px); }
+.start-cta { margin-top: 3vh; font-size: clamp(10px, .8vw, 16px); letter-spacing: .4em; text-transform: uppercase; color: var(--brass); animation: breathe 3.2s ease-in-out infinite; }
+@keyframes breathe { 50% { opacity: .35; } }
+.loading {
+  position: fixed; z-index: 11; left: 0; right: 0; bottom: 8vh; text-align: center;
+  font-size: clamp(10px, .75vw, 14px); letter-spacing: .3em; text-transform: uppercase; color: var(--muted);
+  transition: opacity 1s;
+}
+.loading.gone { opacity: 0; pointer-events: none; }
+body:not(.ready) .start-cta { visibility: hidden; }
+
+.debug {
+  position: fixed; z-index: 20; left: 12px; bottom: 12px; padding: 10px 12px; max-width: 520px; white-space: pre-wrap;
+  background: rgba(0,0,0,.8); border: 1px solid #333; font: 11px/1.55 ui-monospace, Menlo, monospace; color: #9f9;
+}
+
+/* hand-interaction mode: no speech controls or captions */
+.no-speech .controls, .no-speech .caption { display: none; }
+
+/* ---------------- intro (no hand detected) ---------------- */
+.intro {
+  position: fixed; inset: 0; z-index: 5; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.2vh;
+  text-align: center; padding: 0 16px;
+  background: radial-gradient(ellipse 60% 55% at 50% 48%, rgba(3,2,3,.72) 0%, rgba(3,2,3,.35) 60%, transparent 100%);
+  opacity: 0; transition: opacity 1.6s ease;
+}
+.intro.show { opacity: 1; }
+.intro-kicker {
+  font-size: clamp(10px, .8vw, 16px); letter-spacing: .36em; text-transform: uppercase; color: var(--muted);
+}
+.intro-title {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(44px, 5.6vw, 132px); line-height: 1; letter-spacing: -.01em;
+}
+.intro-lines { min-height: 3.2em; display: flex; align-items: center; margin-top: 1vh; }
+.intro-line {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(22px, 2vw, 46px); color: rgba(239,230,216,.92); max-width: 32ch; text-wrap: balance;
+  opacity: 0; transform: translateY(6px); transition: opacity 1.1s ease, transform 1.4s ease;
+}
+.intro-line.show { opacity: 1; transform: none; }
+.intro-cta {
+  margin-top: 3vh; display: flex; align-items: center; gap: 14px;
+  font-size: clamp(11px, .85vw, 17px); letter-spacing: .34em; text-transform: uppercase; color: var(--brass);
+}
+.intro-hand { width: clamp(26px, 2.2vw, 46px); height: auto; fill: none; stroke: var(--brass); stroke-width: 2; animation: raise 2.6s ease-in-out infinite; }
+@keyframes raise { 0%, 100% { transform: translateY(5px); opacity: .55; } 50% { transform: translateY(-5px); opacity: 1; } }
+.intro.show ~ .instruction { opacity: 0 !important; }
+
+/* one quiet line when a prop is picked up */
+.whisper {
+  position: fixed; left: 50%; bottom: 9vh; transform: translate(-50%, 6px); width: min(900px, 86vw);
+  text-align: center; pointer-events: none;
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(20px, 1.7vw, 40px); color: rgba(239,230,216,.85); text-shadow: 0 2px 18px rgba(0,0,0,.9);
+  opacity: 0; transition: opacity .9s ease, transform 1.2s ease;
+}
+.whisper.show { opacity: 1; transform: translate(-50%, 0); }
+
+.intro-on .mark { opacity: 0 !important; transition: opacity 1s; }
+
+/* emphasis: a soft spotlight that follows the held prop and dims the rest */
+.focus {
+  /* A small pre-drawn spotlight, scaled up and moved with transforms only: the GPU composites it,
+     nothing is repainted per frame (repainting a full-screen gradient is slow on a 5K display). */
+  position: fixed; left: 0; top: 0; width: 200px; height: 200px; margin: -100px 0 0 -100px;
+  pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at center, transparent 0, transparent 7%, rgba(2,1,2,.62) 22%, rgba(2,1,2,.62) 100%);
+  will-change: transform, opacity;
+}
+
+/* ---------------- cue card: the current task ---------------- */
+.cue {
+  position: fixed; z-index: 6; top: 5vh; left: 50%; transform: translate(-50%, -10px);
+  width: min(560px, calc(100vw - 32px)); padding: 2.2vh 28px 2vh; text-align: center; pointer-events: none;
+  background: rgba(8,6,6,.82); border: 1px solid rgba(217,163,91,.28); border-radius: 4px;   /* no backdrop blur: too costly over a moving 3D scene */
+  opacity: 0; transition: opacity .7s ease, transform .9s ease;
+}
+.cue.show { opacity: 1; transform: translate(-50%, 0); }
+.cue-kicker { font-size: clamp(10px, .75vw, 14px); letter-spacing: .34em; text-transform: uppercase; color: var(--brass); }
+.cue-title { margin-top: .9vh; font-family: var(--serif); font-weight: 400; font-style: italic; font-size: clamp(26px, 2.4vw, 52px); line-height: 1.05; }
+.cue-text { margin-top: .8vh; font-family: var(--serif); font-weight: 300; font-size: clamp(18px, 1.45vw, 32px); color: rgba(239,230,216,.9); text-wrap: balance; }
+.cue-progress { margin: 1.6vh auto 0; width: 70%; height: 2px; background: rgba(239,230,216,.14); overflow: hidden; }
+.cue-bar { display: block; height: 100%; background: var(--brass); transform-origin: left; transform: scaleX(0); transition: transform .25s linear; box-shadow: 0 0 10px rgba(217,163,91,.7); }
+.cue-hint { margin-top: 1.2vh; min-height: 1.4em; font-size: clamp(11px, .85vw, 16px); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.cue-dots { margin-top: 1vh; display: flex; justify-content: center; gap: 10px; }
+.cue-dots span { width: 7px; height: 7px; border-radius: 50%; border: 1px solid rgba(217,163,91,.6); transition: background .4s, transform .4s; }
+.cue-dots span.now { transform: scale(1.35); border-color: var(--brass); }
+.cue-dots span.done { background: var(--brass); }
+
+/* finale */
+.finale {
+  position: fixed; inset: 0; z-index: 6; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vh; text-align: center;
+  background: radial-gradient(ellipse 55% 45% at 50% 50%, rgba(3,2,3,.6), transparent 75%);
+  opacity: 0; transition: opacity 1.2s ease;
+}
+.finale.show { opacity: 1; }
+.finale-1 { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: clamp(44px, 5vw, 120px); line-height: 1; }
+.finale-2 { font-size: clamp(11px, .9vw, 18px); letter-spacing: .34em; text-transform: uppercase; color: var(--brass); }
+.intro-on .cue, .intro-on .finale { opacity: 0 !important; }
+
+/* ---------------- standby: make the call to action inviting ---------------- */
+.intro-cta { padding: 12px 26px; border: 1px solid rgba(217,163,91,.45); border-radius: 999px; animation: ctaGlow 2.8s ease-in-out infinite; }
+@keyframes ctaGlow { 50% { box-shadow: 0 0 28px rgba(217,163,91,.35); border-color: rgba(217,163,91,.9); } }
+.intro-sub { margin-top: 1.2vh; font-size: clamp(10px, .75vw, 14px); letter-spacing: .26em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------------- prompt book checklist ---------------- */
+.checklist {
+  position: fixed; z-index: 6; left: 2.6vw; top: 50%; transform: translate(-8px, -50%);
+  padding: 18px 20px 14px; min-width: 210px; pointer-events: none;
+  background: rgba(8,6,6,.78); border: 1px solid rgba(217,163,91,.22); border-radius: 4px;
+  opacity: 0; transition: opacity .8s ease, transform .9s ease;
+}
+.ready:not(.intro-on) .checklist { opacity: 1; transform: translate(0, -50%); }
+.checklist-head { font-size: clamp(10px, .72vw, 13px); letter-spacing: .3em; text-transform: uppercase; color: var(--brass); margin-bottom: 12px; }
+.checklist ol { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.checklist li { display: flex; align-items: center; gap: 12px; font-family: var(--serif); font-size: clamp(16px, 1.15vw, 24px); color: rgba(239,230,216,.42); transition: color .5s; }
+.checklist .ck-mark { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--sans); font-size: 12px; border: 1px solid rgba(239,230,216,.3); transition: all .5s; }
+.checklist li.now { color: var(--paper); }
+.checklist li.now .ck-mark { border-color: var(--brass); color: var(--brass); box-shadow: 0 0 12px rgba(217,163,91,.5); animation: nowPulse 1.8s ease-in-out infinite; }
+@keyframes nowPulse { 50% { box-shadow: 0 0 2px rgba(217,163,91,.2); } }
+.checklist li.done { color: rgba(239,230,216,.7); }
+.checklist li.done .ck-text { text-decoration: line-through; text-decoration-color: rgba(217,163,91,.6); }
+.checklist li.done .ck-mark { background: var(--brass); border-color: var(--brass); color: #120c08; }
+.checklist.complete .checklist-head { color: var(--paper); }
+
+/* ---------------- "cue complete" moment ---------------- */
+.toast {
+  position: fixed; z-index: 7; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.92); pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 26px 42px;
+  background: rgba(8,6,6,.8); border: 1px solid rgba(217,163,91,.45); border-radius: 6px;
+  opacity: 0; transition: opacity .45s ease, transform .6s cubic-bezier(.2,1.4,.4,1);
+}
+.toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.toast-check { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; font-size: 28px; color: #120c08; background: var(--brass); box-shadow: 0 0 30px rgba(217,163,91,.6); }
+.toast-line { margin-top: 8px; font-family: var(--serif); font-style: italic; font-size: clamp(26px, 2.2vw, 48px); }
+.toast-sub { font-size: clamp(10px, .75vw, 14px); letter-spacing: .3em; text-transform: uppercase; color: var(--brass); }
+
+/* ---------------- free play banner ---------------- */
+.freeplay {
+  position: fixed; z-index: 6; left: 50%; top: 5vh; transform: translate(-50%, -8px); pointer-events: none; text-align: center;
+  padding: 14px 30px; background: rgba(8,6,6,.72); border: 1px solid rgba(217,163,91,.35); border-radius: 999px;
+  opacity: 0; transition: opacity .9s ease, transform .9s ease;
+}
+.freeplay.show { opacity: 1; transform: translate(-50%, 0); }
+.freeplay-line { font-family: var(--serif); font-style: italic; font-size: clamp(20px, 1.6vw, 36px); }
+.freeplay-sub { margin-top: 4px; font-size: clamp(10px, .7vw, 13px); letter-spacing: .3em; text-transform: uppercase; color: var(--brass); }
+.intro-on .freeplay, .intro-on .toast { opacity: 0 !important; }
+
+/* the "not that one" hint stands out */
+.cue-hint.warn { color: #ffb38a; }
+.freeplay-sub { transition: opacity .35s ease; }
+.freeplay-sub.swap { opacity: 0; }

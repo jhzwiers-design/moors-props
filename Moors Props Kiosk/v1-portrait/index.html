@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>You on the Moors Now — Welcome</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter+Tight:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/kiosk.css">
+</head>
+<body>
+
+  <!-- Backstage environment -->
+  <div class="stage" aria-hidden="true">
+    <div class="curtain curtain--left"></div>
+    <div class="curtain curtain--right"></div>
+    <div class="valance"></div>
+    <div class="beam"></div>
+    <canvas id="dust" class="dust"></canvas>
+    <div class="floor"></div>
+    <div class="grain"></div>
+  </div>
+
+  <div class="layout">
+    <header class="marquee">
+      <p class="eyebrow"><span id="presenter"></span><span class="eyebrow-sep">presents</span></p>
+      <h1 id="title" class="title"></h1>
+    </header>
+
+    <main class="center">
+      <div class="portrait" id="portrait" role="img" aria-label="Portrait of the director, who turns to look at you">
+        <canvas id="portrait-canvas"></canvas>
+        <img id="portrait-fallback" alt="" class="portrait-fallback">
+      </div>
+      <p class="credit"><span id="director-name"></span><span id="director-role" class="role"></span></p>
+    </main>
+
+    <section class="speech" aria-live="polite">
+      <p id="caption" class="caption"></p>
+      <div class="prompt-wrap">
+        <p id="prompt" class="prompt"></p>
+        <p id="prompt-sub" class="prompt-sub"></p>
+      </div>
+    </section>
+  </div>
+
+  <!-- Presence: a quiet line showing the director has found you -->
+  <div class="presence" aria-hidden="true"><span id="presence-dot" class="presence-dot"></span></div>
+
+  <p class="privacy">Camera is processed on this screen only · nothing is recorded or stored</p>
+
+  <nav class="controls" aria-label="Audio controls">
+    <button id="btn-replay" class="ctl" aria-label="Replay welcome">
+      <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/></svg>
+    </button>
+    <button id="btn-mute" class="ctl" aria-label="Mute" aria-pressed="false">
+      <svg class="i-on" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>
+      <svg class="i-off" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
+    </button>
+  </nav>
+
+  <!-- One tap is needed to enable sound + camera (browser rule). Skip with ?autostart -->
+  <div id="start" class="start">
+    <button id="start-btn" class="start-btn">
+      <span class="start-kicker">Loyola University New Orleans</span>
+      <span class="start-title">You on the <em>Moors Now</em></span>
+      <span class="start-cta">Touch to begin</span>
+    </button>
+    <p class="start-note">This experience uses the camera to follow where you are standing.<br>Video never leaves this device and is not recorded.</p>
+  </div>
+
+  <!-- Debug (press D) -->
+  <div id="debug" class="debug" hidden>
+    <div class="debug-video"><video id="cam" playsinline muted></video><div id="debug-box" class="debug-box"></div></div>
+    <pre id="debug-text"></pre>
+    <p>D tracking · C calibrate portrait · F fullscreen</p>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

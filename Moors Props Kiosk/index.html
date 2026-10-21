@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>You on the Moors Now — Stage Props</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;1,300;1,400&family=Inter+Tight:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/kiosk.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body data-state="loading">
+  <div id="stage" class="stage"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div id="focus" class="focus" aria-hidden="true"></div>
+
+  <p class="mark"><span id="mark-title"></span></p>
+  <p id="instruction" class="instruction"></p>
+  <p id="message" class="message"></p>
+  <p id="caption" class="caption" aria-live="polite"></p>
+
+  <!-- Intro: shown whenever no hand is detected -->
+  <section id="intro" class="intro" aria-live="polite">
+    <p class="intro-kicker"><span id="intro-presenter"></span> presents</p>
+    <h1 id="intro-title" class="intro-title"></h1>
+    <div class="intro-lines"><p id="intro-line" class="intro-line"></p></div>
+    <div class="intro-cta">
+      <svg class="intro-hand" viewBox="0 0 64 80" aria-hidden="true">
+        <rect x="18" y="38" width="30" height="30" rx="12"/>
+        <rect x="19" y="14" width="7" height="30" rx="3.5"/>
+        <rect x="27.5" y="8" width="7" height="34" rx="3.5"/>
+        <rect x="36" y="11" width="7" height="32" rx="3.5"/>
+        <rect x="44.5" y="19" width="6.5" height="26" rx="3.25"/>
+        <rect x="6" y="40" width="7" height="22" rx="3.5" transform="rotate(-38 9.5 51)"/>
+      </svg>
+      <span id="intro-cta"></span>
+    </div>
+    <p id="intro-sub" class="intro-sub"></p>
+  </section>
+  <p id="whisper" class="whisper" aria-live="polite"></p>
+
+  <!-- Cue card: the task the visitor is on -->
+  <section id="cue" class="cue" aria-live="polite">
+    <p id="cue-kicker" class="cue-kicker"></p>
+    <h2 id="cue-title" class="cue-title"></h2>
+    <p id="cue-text" class="cue-text"></p>
+    <div class="cue-progress"><span id="cue-bar" class="cue-bar"></span></div>
+    <p id="cue-hint" class="cue-hint"></p>
+    <div id="cue-dots" class="cue-dots"></div>
+  </section>
+  <!-- Prompt book: all four cues, ticked off as they're done -->
+  <aside id="checklist" class="checklist" aria-live="polite">
+    <p id="checklist-head" class="checklist-head"></p>
+    <ol id="checklist-items"></ol>
+  </aside>
+  <!-- "Cue complete" moment -->
+  <section id="toast" class="toast" aria-live="assertive">
+    <span class="toast-check">✓</span>
+    <p id="toast-line" class="toast-line"></p>
+    <p id="toast-sub" class="toast-sub"></p>
+  </section>
+  <!-- Free play: shown after all cues are done -->
+  <section id="freeplay" class="freeplay" aria-live="polite">
+    <p id="freeplay-line" class="freeplay-line"></p>
+    <p id="freeplay-sub" class="freeplay-sub"></p>
+  </section>
+  <section id="finale" class="finale" aria-live="polite">
+    <p class="finale-1"></p>
+    <p class="finale-2"></p>
+  </section>
+
+  <nav class="controls" aria-label="Sound">
+    <button id="btn-replay" class="ctl" aria-label="Replay welcome">
+      <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/></svg>
+    </button>
+    <button id="btn-mute" class="ctl" aria-label="Mute" aria-pressed="false">
+      <svg class="i-on" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>
+      <svg class="i-off" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
+    </button>
+  </nav>
+
+  <!-- A single touch is required by browsers before sound can play. Skip with ?autostart + kiosk Chrome flags. -->
+  <div id="start" class="start">
+    <p id="start-kicker" class="start-kicker"></p>
+    <p id="start-title" class="start-title"></p>
+    <p class="start-cta">Touch to begin</p>
+  </div>
+  <p id="loading" class="loading">Preparing the stage…</p>
+
+  <pre id="debug" class="debug" hidden></pre>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
